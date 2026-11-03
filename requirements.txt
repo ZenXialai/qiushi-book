@@ -1,0 +1,11 @@
+# 运行所需（Typst 是外部程序，不在这里）
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+Pillow>=10.0
+fonttools>=4.50
+brotli>=1.1
+
+# 可选：仅用于本地自检（页数、字体、书签）
+# 注意 AGPL-3.0，见 THIRD-PARTY-NOTICES.md
+# pymupdf>=1.24

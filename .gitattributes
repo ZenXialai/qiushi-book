@@ -1,0 +1,11 @@
+# 统一换行：bat 必须是 CRLF，否则 cmd 会把批处理解析错乱
+* text=auto eol=lf
+# 批处理按二进制存，保证 blob 里就是 CRLF（ZIP 下载/各平台克隆都不会被改）
+*.bat -text
+*.cmd -text
+
+# 二进制
+*.png binary
+*.pdf binary
+*.ttf binary
+*.otf binary

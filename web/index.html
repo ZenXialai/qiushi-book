@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>《求是》PDF 生成器</title>
+<style>
+  :root{
+    --red:#c1121f; --red-dark:#8e0d17; --ink:#1f2328; --muted:#6b7280;
+    --line:#e6e8eb; --bg:#f6f7f9; --ok:#137a3f; --warn:#a35c00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 20px 60px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .mark{width:44px;height:44px;border-radius:10px;background:var(--red);color:#fff;
+    display:grid;place-items:center;font-size:22px;font-weight:700;letter-spacing:1px}
+  h1{font-size:20px;margin:0;font-weight:650;letter-spacing:.5px}
+  header .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;
+    box-shadow:0 1px 2px rgba(16,24,40,.04);margin-bottom:16px}
+  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:6px}
+  label{font-size:13px;color:var(--muted)}
+  select,input[type=number]{font:inherit;padding:9px 12px;border:1px solid var(--line);
+    border-radius:9px;background:#fff;min-width:130px;color:var(--ink)}
+  select:focus,input:focus{outline:2px solid #f3d2d5;border-color:var(--red)}
+  button{font:inherit;border:0;border-radius:9px;padding:10px 18px;cursor:pointer;
+    background:var(--red);color:#fff;font-weight:600;transition:.15s}
+  button:hover{background:var(--red-dark)}
+  button:disabled{background:#d9dde3;color:#fff;cursor:not-allowed}
+  button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500}
+  button.ghost:hover{background:#f2f3f5}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .hint a{color:var(--red);text-decoration:none}
+  /* progress */
+  #progressCard{display:none}
+  .bar{height:10px;background:#eef0f3;border-radius:99px;overflow:hidden;margin:4px 0 10px}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e03e4a,var(--red));
+    border-radius:99px;transition:width .35s ease}
+  .stage{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+  .stage b{color:var(--ink);font-weight:600}
+  pre#log{background:#0f1115;color:#c9d1d9;border-radius:10px;padding:12px 14px;
+    font:12px/1.55 ui-monospace,Consolas,"Cascadia Mono",monospace;height:190px;
+    overflow:auto;margin:12px 0 0;white-space:pre-wrap;word-break:break-all}
+  /* result */
+  #resultCard{display:none}
+  .file{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+  .fname{font-weight:650;font-size:16px;word-break:break-all}
+  .meta{color:var(--muted);font-size:13px;margin-top:3px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  /* banners */
+  .banner{display:none;border-radius:10px;padding:11px 14px;font-size:13.5px;margin-bottom:14px}
+  .banner.bad{background:#fdecee;color:#8e0d17;border:1px solid #f7c9ce}
+  .banner.warn{background:#fff7e6;color:var(--warn);border:1px solid #f6e2b8}
+  .banner.good{background:#eaf6ee;color:var(--ok);border:1px solid #c7e6d3}
+  .foot{color:var(--muted);font-size:12.5px;text-align:center;margin-top:26px;line-height:1.9}
+  .sec-title{font-size:13px;color:var(--muted);letter-spacing:.4px;margin:0 0 12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark">求</div>
+    <div>
+      <h1>《求是》PDF 生成器</h1>
+      <div class="sub">选期号 → 一键生成平板精排版 PDF（思源宋体 · 目录页码 · 图注随图）</div>
+    </div>
+  </header>
+
+  <div id="envBanner" class="banner bad"></div>
+  <div id="errBanner" class="banner bad"></div>
+
+  <section class="card">
+    <p class="sec-title">选择期号</p>
+    <div class="row">
+      <div class="field" id="selYear">
+        <label for="year">年份</label>
+        <select id="year"></select>
+      </div>
+      <div class="field" id="selIssue">
+        <label for="issue">期号</label>
+        <select id="issue"></select>
+      </div>
+      <div class="field" id="manYear" style="display:none">
+        <label for="yearIn">年份</label>
+        <input id="yearIn" type="number" min="2018" max="2100">
+      </div>
+      <div class="field" id="manIssue" style="display:none">
+        <label for="issueIn">期号</label>
+        <input id="issueIn" type="number" min="1" max="60">
+      </div>
+      <button id="latestBtn" class="ghost" title="选中最新一期">最新一期</button>
+      <button id="buildBtn">开始生成</button>
+      <button id="cancelBtn" class="ghost" style="display:none">取消</button>
+    </div>
+    <div class="hint" id="pickHint">正在获取期号列表…</div>
+  </section>
+
+  <section class="card" id="progressCard">
+    <div class="stage"><b id="stageText">准备中</b><span id="pctText">0%</span></div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="meta" id="timeText"></div>
+    <pre id="log"></pre>
+  </section>
+
+  <section class="card" id="resultCard">
+    <div class="file">
+      <div>
+        <div class="fname" id="fileName"></div>
+        <div class="meta" id="fileMeta"></div>
+      </div>
+      <div class="actions">
+        <button id="downloadBtn">下载 PDF</button>
+        <button id="folderBtn" class="ghost">打开所在文件夹</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    输出目录：<span id="outDir">—</span><br>
+    生成一次约需 60–120 秒（20 余篇文章与图片需逐篇抓取）<br>
+    <button id="quitBtn" class="ghost" style="margin-top:12px;font-size:13px;padding:7px 14px">退出服务</button>
+    <div id="quitTip" style="color:var(--ok);display:none;margin-top:8px">服务已关闭，可以关掉这个页面了。</div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let yearsData = [], currentJob = null, timer = null, lastLog = "";
+
+function showBanner(el, msg){ if(!msg){ el.style.display='none'; return; }
+  el.textContent = msg; el.style.display = 'block'; el.className = 'banner ' + el.dataset.kind; }
+
+async function health(){
+  try{
+    const r = await fetch('/api/health'); const d = await r.json();
+    $('#outDir').textContent = d.out_dir || '—';
+    if(d.missing && d.missing.length){
+      const el = $('#envBanner'); el.dataset.kind='bad';
+      showBanner(el, '环境缺少：' + d.missing.join('、') + '，生成会失败。缺 typst 请执行 winget install --id Typst.Typst -e；缺字体请运行 python make_fonts.py。');
+    }
+  }catch(e){}
+}
+
+function fillYears(){
+  const ys = $('#year'); ys.innerHTML = '';
+  yearsData.forEach((y, i) => {
+    const o = document.createElement('option'); o.value = i; o.textContent = y.year + ' 年';
+    ys.appendChild(o);
+  });
+  fillIssues(0);
+}
+
+function fillIssues(yi){
+  const y = yearsData[yi]; const is = $('#issue'); is.innerHTML = '';
+  if(!y){ return; }
+  y.issues.forEach(it => {
+    const o = document.createElement('option');
+    o.value = it.no;
+    o.textContent = '第 ' + it.no + ' 期' + (it.publish ? '　' + it.publish.slice(0,10) : '');
+    is.appendChild(o);
+  });
+  $('#pickHint').textContent = '共 ' + y.issues.length + ' 期可选；最新为第 ' + (y.issues[0] ? y.issues[0].no : '-') + ' 期';
+}
+
+async function loadIssues(force){
+  $('#pickHint').textContent = '正在获取期号列表…';
+  try{
+    const r = await fetch('/api/issues' + (force ? '?force=1' : ''));
+    const d = await r.json();
+    if(!d.ok || !d.years.length) throw new Error(d.error || '没有取到期号');
+    yearsData = d.years;
+    fillYears();
+  }catch(e){
+    // 离线或站点改版时，退回手填年份/期号
+    $('#selYear').style.display='none'; $('#selIssue').style.display='none';
+    $('#manYear').style.display='flex'; $('#manIssue').style.display='flex';
+    $('#yearIn').value = new Date().getFullYear();
+    $('#pickHint').textContent = '期号列表获取失败（' + e.message + '），已切换为手动填写年份 / 期号。';
+  }
+}
+
+function readPick(){
+  if($('#manYear').style.display !== 'none'){
+    return { year: parseInt($('#yearIn').value, 10), issue: parseInt($('#issueIn').value, 10) };
+  }
+  const yi = parseInt($('#year').value || 0, 10);
+  const y = yearsData[yi];
+  return { year: y ? y.year : 0, issue: parseInt($('#issue').value, 10) };
+}
+
+function render(j){
+  $('#progressCard').style.display = 'block';
+  $('#stageText').textContent = j.stage + (j.state === 'running' ? '…' : '');
+  $('#pctText').textContent = Math.round(j.pct) + '%';
+  $('#barFill').style.width = Math.min(100, j.pct) + '%';
+  $('#timeText').textContent = '已用时 ' + j.elapsed + ' 秒';
+  const log = (j.log || []).join('\n');
+  if(log !== lastLog){ const el = $('#log'); const stick = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+    el.textContent = log; lastLog = log; if(stick) el.scrollTop = el.scrollHeight; }
+}
+
+async function poll(){
+  if(!currentJob) return;
+  try{
+    const r = await fetch('/api/job?id=' + currentJob);
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error || '任务丢失');
+    render(j);
+    if(j.state === 'done'){
+      clearInterval(timer); timer = null;
+      $('#buildBtn').disabled = false; $('#cancelBtn').style.display = 'none';
+      $('#resultCard').style.display = 'block';
+      $('#fileName').textContent = j.name;
+      $('#fileMeta').textContent = (j.pages ? j.pages + ' 页 · ' : '') + (j.size/1048576).toFixed(1) + ' MB';
+      const b = $('#downloadBtn'); b.onclick = () => { location.href = '/api/download?id=' + currentJob; };
+    } else if(j.state === 'error' || j.state === 'cancelled'){
+      clearInterval(timer); timer = null;
+      $('#buildBtn').disabled = false; $('#cancelBtn').style.display = 'none';
+      const el = $('#errBanner'); el.dataset.kind = j.state === 'cancelled' ? 'warn' : 'bad';
+      showBanner(el, j.state === 'cancelled' ? '已取消。' : ('生成失败：' + j.error));
+    }
+  }catch(e){
+    clearInterval(timer); timer = null;
+    $('#buildBtn').disabled = false; $('#cancelBtn').style.display = 'none';
+    const el = $('#errBanner'); el.dataset.kind='bad';
+    showBanner(el, '与本地服务失联：' + e.message);
+  }
+}
+
+async function start(){
+  const p = readPick();
+  if(!p.year || !p.issue){ const el=$('#errBanner'); el.dataset.kind='warn'; showBanner(el,'请先选好年份和期号'); return; }
+  showBanner($('#errBanner'), '');
+  $('#resultCard').style.display='none';
+  $('#buildBtn').disabled = true; $('#cancelBtn').style.display = 'inline-block';
+  $('#log').textContent = ''; lastLog = '';
+  try{
+    const r = await fetch('/api/build', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({year:p.year, issue:p.issue})});
+    const d = await r.json();
+    if(!d.ok) throw new Error(d.error || '启动失败');
+    currentJob = d.id;
+    timer = setInterval(poll, 700); poll();
+  }catch(e){
+    $('#buildBtn').disabled = false; $('#cancelBtn').style.display='none';
+    const el=$('#errBanner'); el.dataset.kind='bad'; showBanner(el, '启动失败：' + e.message);
+  }
+}
+
+$('#buildBtn').onclick = start;
+$('#cancelBtn').onclick = async () => { if(!currentJob) return;
+  await fetch('/api/cancel', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id: currentJob})}); };
+$('#latestBtn').onclick = () => {
+  if($('#manYear').style.display !== 'none'){ return; }
+  const is = $('#issue'); $('#year').value = 0; fillIssues(0);
+  if(is.options.length) is.value = is.options[0].value;
+};
+$('#folderBtn').onclick = () => fetch('/api/openfolder', {method:'POST'});
+$('#quitBtn').onclick = async () => {
+  if(currentJob && !confirm('还有任务在进行，确定要关闭服务吗？')) return;
+  try{
+    await fetch('/api/shutdown', {method:'POST'});
+    $('#quitTip').style.display = 'block';
+    $('#quitBtn').disabled = true;
+    $('#buildBtn').disabled = true;
+  }catch(e){
+    $('#quitTip').textContent = '服务似乎已经关闭了。';
+    $('#quitTip').style.display = 'block';
+  }
+};
+$('#year').addEventListener('change', e => fillIssues(parseInt(e.target.value||0,10)));
+
+health(); loadIssues(false);
+</script>
+</body>
+</html>
