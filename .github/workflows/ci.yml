@@ -16,9 +16,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python: ["3.10", "3.12"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 
@@ -34,9 +34,9 @@ jobs:
     name: 排版冒烟（真编译一份样张）
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -53,4 +53,5 @@ jobs:
           python build.py tests/fixture/issue.json /tmp/fx/book.typ
           cd /tmp/fx && typst compile book.typ book.pdf
           test -s /tmp/fx/book.pdf
-          echo "生成 $(stat -c%s /tmp/fx/book.pdf) 字节"
+          echo "- 样张大小：$(stat -c%s /tmp/fx/book.pdf) 字节" >> "$GITHUB_STEP_SUMMARY"
+          echo "- typst：$(typst --version)" >> "$GITHUB_STEP_SUMMARY"
