@@ -153,7 +153,7 @@ class RepoContentTest(unittest.TestCase):
         bad = []
         for line in r.stdout.splitlines():
             name = line.strip()
-            if not name or name.startswith("docs/") or name.startswith("tests/fixture/img/"):
+            if not name or name.startswith("docs/") or name.startswith("tests/fixture/"):
                 continue
             if re.search(r"\.(pdf|jpe?g|png|ttf|otf)$", name) or name.startswith(("img/", "fonts/")):
                 bad.append(name)

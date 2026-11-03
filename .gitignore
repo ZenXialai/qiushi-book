@@ -1,21 +1,22 @@
 # ---- 抓取内容与成书产物：版权归求是杂志社，一律不入库 ----
-img/
-output/
-issue*.json
-book*.typ
+# 只匹配仓库根目录，别误伤 tests/fixture/
+/img/
+/output/
+/issue*.json
+/book*.typ
 *.pdf
 
 # ---- 字体（OFL 衍生文件，由 make_fonts.py 本地生成）----
-fonts/
+/fonts/
 
 # ---- 上游仓库：使用者自行 clone，本项目不 vendor ----
-Qiushi-Downloader/
-vendor/
+/Qiushi-Downloader/
+/vendor/
 
 # ---- 调试与临时文件 ----
-_r/
-_t/
-_*.py
+/_r/
+/_t/
+/_*.py
 *.log
 _bat.out
 

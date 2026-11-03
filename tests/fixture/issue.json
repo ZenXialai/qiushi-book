@@ -1,0 +1,44 @@
+{
+  "issue": {
+    "title": "《求是》2026 年第 1 期",
+    "year": 2026,
+    "no": 1,
+    "publish": "2026-01-01 09:00:00",
+    "publish_day": "2026-01-01",
+    "source": "qstheory",
+    "toc_url": "https://example.invalid/toc.html",
+    "cover": "img/cover.jpg",
+    "n_articles": 2
+  },
+  "articles": [
+    {
+      "idx": 1,
+      "column": "",
+      "title": "本期导读",
+      "subtitle": "",
+      "author": "",
+      "url": "",
+      "blocks": [
+        {"t": "p", "runs": [{"x": "这是第一段正文，用来验证首行缩进与两端对齐。"}]},
+        {"t": "h", "runs": [{"x": "一"}]},
+        {"t": "p", "runs": [{"x": "这是第二段，含"}, {"x": "加粗", "b": true}, {"x": "与"}, {"x": "斜体", "i": true}, {"x": "。"}]},
+        {"t": "p", "runs": [{"x": "带上下标的段落：x"}, {"x": "2", "k": "sup"}, {"x": "。"}]}
+      ]
+    },
+    {
+      "idx": 2,
+      "column": "深度调研",
+      "title": "一篇带图片与引用的测试文章",
+      "subtitle": "副标题",
+      "author": "某某",
+      "url": "",
+      "blocks": [
+        {"t": "p", "runs": [{"x": "正文段落。"}]},
+        {"t": "h", "runs": [{"x": "同志们：", "b": true}]},
+        {"t": "quote", "runs": [{"x": "这是一段引文。"}]},
+        {"t": "img", "src": "img/a01_1.jpg", "w": 800, "h": 500},
+        {"t": "cap", "runs": [{"x": "图注：这是说明文字。摄影 某某"}]}
+      ]
+    }
+  ]
+}
