@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: 冒烟测试（Python ${{ matrix.python }} / ${{ matrix.os }}）
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 跑测试
+        run: python -m unittest discover -s tests -v
+
+  typst:
+    name: 排版冒烟（真编译一份样张）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装 typst
+        run: |
+          curl -fsSL https://github.com/typst/typst/releases/latest/download/typst-x86_64-unknown-linux-musl.tar.xz \
+            | tar -xJ --strip-components=1 -C /usr/local/bin typst-x86_64-unknown-linux-musl/typst
+          typst --version
+
+      - name: 用测试数据生成 .typ 并编译
+        run: |
+          mkdir -p /tmp/fx/img
+          cp tests/fixture/img/*.jpg /tmp/fx/img/
+          python build.py tests/fixture/issue.json /tmp/fx/book.typ
+          cd /tmp/fx && typst compile book.typ book.pdf
+          test -s /tmp/fx/book.pdf
+          echo "生成 $(stat -c%s /tmp/fx/book.pdf) 字节"

@@ -1,5 +1,8 @@
 # 《求是》精排版 PDF 生成器
 
+[![CI](https://github.com/ZenXialai/qiushi-book/actions/workflows/ci.yml/badge.svg)](https://github.com/ZenXialai/qiushi-book/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 把 [求是网](http://www.qstheory.cn) 上某期《求是》抓下来，排成**一本真正的书**：封面、扉页、点线目录、页眉页脚、楷体图注，输出 3:4 的平板尺寸 PDF。附一个本地网页界面，选年份/期号点一下就能拿书。
 
 ![封面](docs/cover.png)
@@ -129,6 +132,24 @@ git clone https://github.com/XHSecurity/Qiushi-Downloader vendor/Qiushi-Download
 
 **中途想停**
 网页上点「取消」，命令行 `Ctrl+C`；已生成的部分文件在 `img/` 里，可随时删掉重来。
+
+## 开发与测试
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+测试不联网、不需要上游仓库和字体：
+
+- 语法检查、脚本互相引用是否有效（防"改名漏改引用"）
+- `start.bat` 必须是 CRLF + ASCII（防 cmd 解析错乱）
+- 不许写死开发机路径
+- 用 `tests/fixture/` 造一份两篇文章的假数据，跑 `build.py` 并校验生成的 Typst；
+  本机装了 typst 时顺便真编译一次
+- 仓库里不许提交文章/图片/PDF/字体
+
+CI（`.github/workflows/ci.yml`）在 Ubuntu + Windows、Python 3.10/3.12 上跑这套测试，
+另有一个 job 下载 typst 真编译一份样张。
 
 ## 免责声明
 
