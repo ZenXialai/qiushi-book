@@ -29,7 +29,7 @@
 ## 安装
 
 ```bash
-git clone <本仓库> qiushi-book
+git clone https://github.com/ZenXialai/qiushi-book.git
 cd qiushi-book
 pip install -r requirements.txt
 
@@ -100,6 +100,35 @@ qiushi-book/
 - 栏目名（深度调研、求是专访……）靠版式特征识别，个别期可能漏标
 - 纯图片的"统计图表"只能整幅嵌入，无法还原成可编辑表格
 - 需要能访问 qstheory.cn；请控制抓取频率，别给站点添麻烦
+
+## 常见问题
+
+**`typst: command not found` / 提示找不到 typst**
+`winget install --id Typst.Typst -e` 装完后新开一个终端；或把它加进 PATH。
+`make.py` 会先在 PATH 里找，找不到再试 WinGet 的默认安装路径。
+
+**提示找不到 Qiushi-Downloader**
+期号发现要用它，克隆到本项目里即可：
+```bash
+git clone https://github.com/XHSecurity/Qiushi-Downloader vendor/Qiushi-Downloader
+```
+已经有的话，`set QIUSHI_REPO=D:\path\to\Qiushi-Downloader` 也行。
+
+**正文细得看不清 / 字体像“发丝体”**
+说明用的是系统里的可变字体默认实例（最细的那一档）。跑一次 `python make_fonts.py`，
+它会切出 Regular/Bold 两个静态字重到 `fonts/`，排版时用 `--font-path fonts` 就不会了。
+
+**8720 端口被占用**
+`app.py` 会自动往上找空闲端口，实际地址打印在窗口里；也可以 `python app.py --port 9000`。
+
+**Windows 控制台中文乱码**
+`start.bat` 里已经 `chcp 65001`；手动运行时先 `chcp 65001` 再跑。
+
+**抓取报错 / 抓到 0 篇**
+站点改版了。`extract.py` 里靠两个正则识别文章链接与发布时间，按新页面结构改一下即可。
+
+**中途想停**
+网页上点「取消」，命令行 `Ctrl+C`；已生成的部分文件在 `img/` 里，可随时删掉重来。
 
 ## 免责声明
 

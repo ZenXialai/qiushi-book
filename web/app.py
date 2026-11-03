@@ -2,7 +2,7 @@
 
     python app.py [--port 8720] [--no-open]
 
-流程：列期号 → 抓取(extract.py) → 排版(build2.py + typst) → 复制到输出目录。
+流程：列期号 → 抓取(extract.py) → 排版(build.py + typst) → 复制到输出目录。
 """
 from __future__ import annotations
 
@@ -163,7 +163,7 @@ def run_job(job: Job) -> None:
 
         if job.state == "cancelled":
             return
-        code = run_stream(job, [PY, "build2.py", js.name, typ.name],
+        code = run_stream(job, [PY, "build.py", js.name, typ.name],
                           "排版（生成 Typst 源）", 72, 6)
         if code != 0:
             raise RuntimeError("排版脚本失败（exit %d）" % code)

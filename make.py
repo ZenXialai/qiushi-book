@@ -80,7 +80,7 @@ def main() -> None:
 
     typ = ROOT / ("book-%s.typ" % tag)
     pdf = ROOT / ("book-%s.pdf" % tag)
-    run([sys.executable, "build2.py", js.name, typ.name])
+    run([sys.executable, "build.py", js.name, typ.name])
     run([typst(), "compile", typ.name, pdf.name, "--font-path", "fonts"])
 
     meta = json.loads(js.read_text(encoding="utf-8"))["issue"]
